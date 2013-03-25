@@ -1,0 +1,64 @@
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <string.h>
+
+int p[2];
+pid_t pid;
+
+void handler(int s)
+{
+  kill(pid,SIGKILL);
+
+	int b=0;
+
+	while(1)
+	{
+		char a[1];
+		if (read(p[0],a,1)!=0)
+		{
+			b=b+1;
+		}	
+		else {break;}
+	}
+	printf("%f\n",b/10.0);
+}
+int main(int argc,char** argv)
+{
+	pipe(p);
+	int time=10;
+	pid=fork();
+
+	if (pid==-1)
+	{	
+		fprintf(stderr,"Something wrong with fork");
+		return 0;
+	}
+	if (pid==0)
+	{
+		close(p[0]);
+		while(1)
+		{
+			write(p[1],"abcdefghijklmnop",strlen("abcdefghijklmnop"));
+		}
+	}
+	else
+	{
+		alarm(time);
+ 		
+		close(p[1]);
+		
+		struct sigaction re;
+		re.sa_handler=handler;
+		
+		sigaction(SIGALRM,&re,NULL);
+
+		int ko;
+		wait(&ko);
+	}
+	return 0;
+}
