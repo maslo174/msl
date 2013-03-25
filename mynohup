@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <signal.h>
+
+
+int main (int argc,char** argv)
+{
+  if (argc<2)
+	{
+		fprintf(stderr,"Not enough arguments");
+	}
+	pid_t pid;
+	char** arguments=(char**) malloc ((argc-1)*sizeof(char*));
+	if (arguments==NULL)
+	{
+		fprintf(stderr,"I can not give you such amount of memory");
+	} 
+	int i;
+	for (i=0;i<argc-1;++i)
+	{
+		arguments[i]=argv[i+1];
+	}
+	pid=fork();
+	if (pid==-1)
+	{	
+		fprintf(stderr,"Something wrong with fork");
+		return 0;
+	}
+	if (pid==0)
+	{
+		execv(arguments[0],arguments);
+	}
+	else
+	{
+		struct sigaction re;
+		re.sa_handler=SIG_IGN;
+		if (sigaction(14,&re,NULL)==0)
+		{
+			printf ("SIGALRM shall not pass");
+		}
+	}
+
+}
