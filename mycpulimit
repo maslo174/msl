@@ -1,0 +1,67 @@
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
+
+int main (int argc,char** argv)
+{
+  if (argc<3)
+	{
+		fprintf(stderr,"Not enough arguments");
+	}
+	pid_t pid;
+	int a;
+	int b;
+	int pcnt;
+	pcnt=atoi(argv[1]);
+	b=10;
+	char** arguments=(char**) malloc ((argc-2)*sizeof(char*));
+	if (arguments==NULL)
+	{
+		fprintf(stderr,"I can not give you such amount  of memory");
+	} 
+	int i;
+	for (i=0;i<argc-1;++i)
+	{
+		arguments[i]=argv[i+2];
+	}
+	if (pid==-1)
+	{	
+		fprintf(stderr,"Something wrong with fork");
+		return 0;
+	}
+	if (pid==0)
+	{
+		execv(arguments[0],arguments);
+	}
+	else
+	{
+		while (1)
+		{
+			if (kill(pid,0)==-1)
+			{
+				fprintf(stderr,"Something wrong with kill");
+				return 0;
+			}
+			else
+			{
+				double t=0;
+				while(t<pcnt)
+				{
+					a+=10;
+					b+=10;
+					t=a/b;
+				}
+			}
+			kill(pid,SIGSTOP);
+			usleep(10);
+			kill(pid,SIGCONT);
+		}
+		a=0;
+	}
+	return 0;
+}
