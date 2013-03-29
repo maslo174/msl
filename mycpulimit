@@ -44,7 +44,7 @@ int main (int argc,char** argv)
 		{
 			if (kill(pid,0)==-1)
 			{
-				fprintf(stderr,"Something wrong with kill");
+				fprintf(stderr,"program stop/n");
 				return 0;
 			}
 			else
