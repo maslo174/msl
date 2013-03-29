@@ -18,7 +18,7 @@ int main (int argc,char** argv)
 	int b;
 	int pcnt;
 	pcnt=atoi(argv[1]);
-	b=10;
+	b=pcnt;
 	char** arguments=(char**) malloc ((argc-2)*sizeof(char*));
 	if (arguments==NULL)
 	{
@@ -54,7 +54,7 @@ int main (int argc,char** argv)
 				{
 					a+=10;
 					b+=10;
-					t=a/b;
+					t=a/b * 100;
 				}
 			}
 			kill(pid,SIGSTOP);
