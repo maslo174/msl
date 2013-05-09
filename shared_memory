@@ -1,0 +1,96 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <signal.h>
+#include <fcntl.h>
+
+#define true 1
+
+
+
+
+int main (int argc,char** argv)
+{
+  int shar_fd_1=shm_open("/pipe_buffer",O_CREAT | O_RDWR, 0666);
+  if (shar_fd_1==-1)
+  {
+    printf ("can't open shar_fd_1");
+    return 0;
+  }
+  if (ftruncate(shar_fd_1,65536)==-1)
+  {
+    printf("cant truncate");
+    return 0;
+  }
+  char* buffer = (char*) mmap (NULL,65536,PROT_READ | PROT_WRITE, MAP_SHARED, shar_fd_1,0);
+  if (buffer == (void*) -1)
+  {
+    printf ("can't mmap memory");
+    return 0;
+  }
+  int shar_fd_2=shm_open("/pipe_buffer",O_CREAT | O_RDWR, 0666);
+  if (shar_fd_2==-1)
+  {
+    printf ("can't open shar_fd_2");
+    return 0;
+  }
+  if (ftruncate(shar_fd_2,3*sizeof(long long))==-1)
+  {
+    printf ("can't truncate");
+    return 0;
+  }
+  long long * p=(long long *) mmap (NULL,3*sizeof(long long), PROT_READ | PROT_WRITE, MAP_SHARED, shar_fd_2,0);
+  if (p==(void*) -1)
+  {
+    printf ("can't mmap memory");
+    return 0;
+  }
+  p[0]=p[2]=0;
+  p[1]=1;
+  int pid1;
+  pid1=fork();
+  if (pid1<0)
+  {
+    printf ("can't fork");
+    return 0;
+  }
+  if (pid1==0)
+  {
+    while (true)
+      while (p[1]!=p[0])
+      {
+  buffer[p[1]]=0;
+	p[1]=(p[1]+1)%65536;
+      }
+  }
+  else
+  {
+    int pid2;
+    pid2=fork();
+    if (pid2<0)
+    {
+      printf ("can't fork");
+      return 0;
+    }
+    if (pid2==0)
+    {
+      while (true)
+	while(p[0]!=p[1])
+	{
+	  buffer[p[0]]=1;
+	  p[0]=(p[0]+1)%65536;
+	  ++p[2];
+	}
+    }
+    else
+    {
+      usleep(1000);
+      kill(pid1,SIGINT);
+      kill(pid2,SIGINT);
+      printf ("micsec: %d \n",1000);
+      printf ("Number of bytes: %lld \n",p[2]);
+    }
+  }
+  return 0;
+}
