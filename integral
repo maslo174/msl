@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <math.h>
+#include <pthread.h>
+
+#define step 0.000000001;
+
+typedef struct part1 part;
+
+//функцию здесь ввести должен ты
+float function (float x)
+{
+  return x*x;
+}
+
+struct part1
+{
+	float a;
+	float b;
+	float result;
+};
+
+
+void* integration (void* s)
+{
+	part* p=(part*) s;
+	float i;
+	for (i=(p->a);i<(p->b);i+step)
+	{
+		p->result+=function(a+i)*step;
+	}
+}
+
+
+int main (int argc,char* argv[])
+{
+	float a;
+	float b;
+	float result=0;
+
+	printf ("Put left border and right border\n");
+	scanf ("%f %f",a,b);
+
+	int numThreads;
+	printf ("Put number of threads\n");
+	scanf ("%d",numThreads);
+	
+
+	if (numThreads<1)
+	{
+		printf ("It would be 1 thread\n");
+	}	
+
+	part parts[numThreads];
+	pthread_t threads[numThreads];
+	
+	
+	float segment= (b-a)/numThreads;		
+	int i;	
+		
+	parts[0].a=a;
+	parts[0].b=a+segment;
+	parts[0].result=0;
+	for (i=1;i<numThreads;++i)
+	{
+		parts[i].a=parts[i-1].b;
+		parts[i].b=parts[i].a+segment;
+		parts[i].result=0;
+	}
+	
+	for (i=0;i<numThreads;++i)
+	{
+		pthread_create(&threads[i],NULL,integration,&parts[i]);
+	}
+	for (i=0;i<numThreads;++i)
+	{
+		pthread_join(threads[i],NULL);
+		
+		result+=parts[i].result;
+	}
+}
