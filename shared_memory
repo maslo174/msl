@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <semaphore.h>
 
 #define true 1
 
@@ -12,6 +13,9 @@
 
 int main (int argc,char** argv)
 {
+  int sec;
+  printf("insert how many micro seconds do you want to work this program\n");
+  scanf ("%d",&sec);
   int shar_fd_1=shm_open("/pipe_buffer",O_CREAT | O_RDWR, 0666);
   if (shar_fd_1==-1)
   {
@@ -60,7 +64,7 @@ int main (int argc,char** argv)
     while (true)
       while (p[1]!=p[0])
       {
-  buffer[p[1]]=0;
+	buffer[p[1]]=0;
 	p[1]=(p[1]+1)%65536;
       }
   }
@@ -85,10 +89,10 @@ int main (int argc,char** argv)
     }
     else
     {
-      usleep(1000);
+      usleep(sec);
       kill(pid1,SIGINT);
       kill(pid2,SIGINT);
-      printf ("micsec: %d \n",1000);
+      printf ("micsec: %d \n",sec);
       printf ("Number of bytes: %lld \n",p[2]);
     }
   }
