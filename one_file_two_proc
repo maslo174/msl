@@ -35,7 +35,7 @@ int main (int argc,char** argv)
   }
   int n;
   printf ("insert number of steps\n");
-  scanf ("%d",n);
+  scanf ("%d",&n);
   if (fork()==-1)
   {
     printf("cant fork");
@@ -81,5 +81,6 @@ int main (int argc,char** argv)
     }
   }
   sem_close(s1);
+  
   return 0;
 }
