@@ -9,9 +9,10 @@
 
 int main (int argc,char** argv)
 {
-  if (argc<2)
+	if (argc<2)
 	{
-		fprintf(stderr,"Not enough arguments");
+		fprintf(stderr,"Not enough arguments\n");
+		return 0;
 	}
 	pid_t pid;
 	char** arguments=(char**) malloc ((argc-1)*sizeof(char*));
@@ -27,21 +28,22 @@ int main (int argc,char** argv)
 	pid=fork();
 	if (pid==-1)
 	{	
-		fprintf(stderr,"Something wrong with fork");
+		fprintf(stderr,"Something wrong with fork\n");
 		return 0;
 	}
 	if (pid==0)
 	{
+		struct sigaction re;
+		re.sa_handler=SIG_IGN;
+		if (sigaction(14,&re,NULL)!=0)
+		{
+			printf ("SIGALRM shall not pass\n");
+		}
 		execv(arguments[0],arguments);
 	}
 	else
 	{
-		struct sigaction re;
-		re.sa_handler=SIG_IGN;
-		if (sigaction(14,&re,NULL)==0)
-		{
-			printf ("SIGALRM shall not pass");
-		}
+		waitpid(pid,NULL,NULL);
 	}
 
 }
